@@ -74,6 +74,45 @@ def is_valid_move(game_state: GameState, move: Move) -> bool:
         if piece.x != move.to_x and piece.y != move.to_y:
             return False
             
+        # Check if this is a capture move
+        capturing = any(
+            p.x == move.to_x and p.y == move.to_y and p.side != piece.side
+            for p in game_state.pieces
+        )
+        
+        if piece.x == move.to_x:  # Vertical move
+            start_y = min(piece.y, move.to_y)
+            end_y = max(piece.y, move.to_y)
+            # Count pieces between start and end positions
+            pieces_between = [
+                p for p in game_state.pieces
+                if p.x == piece.x 
+                and start_y < p.y < end_y
+                and (p.x != move.to_x or p.y != move.to_y)  # Exclude target position
+            ]
+            if capturing and len(pieces_between) != 1:
+                print(f"Invalid cannon capture: need exactly one piece between, found {len(pieces_between)}")
+                return False
+            if not capturing and len(pieces_between) > 0:
+                print(f"Invalid cannon move: path must be clear for non-capture moves")
+                return False
+        else:  # Horizontal move
+            start_x = min(piece.x, move.to_x)
+            end_x = max(piece.x, move.to_x)
+            # Count pieces between start and end positions
+            pieces_between = [
+                p for p in game_state.pieces
+                if p.y == piece.y 
+                and start_x < p.x < end_x
+                and (p.x != move.to_x or p.y != move.to_y)  # Exclude target position
+            ]
+            if capturing and len(pieces_between) != 1:
+                print(f"Invalid cannon capture: need exactly one piece between, found {len(pieces_between)}")
+                return False
+            if not capturing and len(pieces_between) > 0:
+                print(f"Invalid cannon move: path must be clear for non-capture moves")
+                return False
+            
     elif piece.type == PieceType.SOLDIER:
         # Soldier moves forward one step (or sideways after crossing river)
         print(f"Validating soldier move: from ({piece.x}, {piece.y}) to ({move.to_x}, {move.to_y})")
@@ -216,7 +255,9 @@ def get_ai_move(game_state: GameState) -> Optional[Move]:
                 move = Move(piece_id=i, to_x=x, to_y=y)
                 if is_valid_move(game_state, move):
                     score = evaluate_move(game_state, move)
-                    move_scores[move] = score
+                    # Use tuple as dictionary key instead of Move object
+                    move_key = (move.piece_id, move.to_x, move.to_y)
+                    move_scores[move_key] = (score, move)
                     valid_moves.append(move)
     
     if not valid_moves:
@@ -225,9 +266,9 @@ def get_ai_move(game_state: GameState) -> Optional[Move]:
     
     
     # Select one of the top 3 moves randomly to add variety
-    sorted_moves = sorted(move_scores.items(), key=lambda x: x[1], reverse=True)
+    sorted_moves = sorted(move_scores.items(), key=lambda x: x[1][0], reverse=True)
     top_moves = sorted_moves[:3]
-    selected_move = random.choice(top_moves)[0]
+    selected_move = random.choice(top_moves)[1][1]  # Get the Move object from the tuple
     
     print(f"AI chose move: piece_id={selected_move.piece_id}, to=({selected_move.to_x}, {selected_move.to_y})")
     return selected_move
