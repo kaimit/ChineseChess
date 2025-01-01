@@ -115,29 +115,51 @@ def is_valid_move(game_state: GameState, move: Move) -> bool:
             
     elif piece.type == PieceType.SOLDIER:
         # Soldier moves forward one step (or sideways after crossing river)
-        print(f"Validating soldier move: from ({piece.x}, {piece.y}) to ({move.to_x}, {move.to_y})")
+        print(f"DEBUG: Validating soldier move for {piece.side} from ({piece.x}, {piece.y}) to ({move.to_x}, {move.to_y})")
+        print(f"DEBUG: Current turn is {game_state.current_turn}")
         
-        # Can only move one step
+        # Verify it's the correct player's turn
+        if piece.side != game_state.current_turn:
+            print(f"DEBUG: Invalid move - not {piece.side}'s turn")
+            return False
+        
+        # Can only move one step at a time
         if abs(move.to_x - piece.x) + abs(move.to_y - piece.y) != 1:
-            print("Invalid soldier move: can only move one step")
+            print(f"DEBUG: Invalid soldier move - attempted to move {abs(move.to_x - piece.x) + abs(move.to_y - piece.y)} steps")
             return False
             
+        # Cannot move backwards or sideways before crossing river
         if piece.side == Side.RED:
+            print(f"DEBUG: RED soldier at y={piece.y} (river at y=4)")
+            # Red soldiers start at y=6 and move up (decreasing y)
             if move.to_y >= piece.y:  # Must move forward (upward)
-                print("Invalid soldier move: RED must move upward (y should decrease)")
+                print("DEBUG: Invalid move - RED must move upward (y should decrease)")
                 return False
-            if piece.y < 5:  # Haven't crossed river
+            if piece.y >= 5:  # Haven't crossed river
                 if move.to_x != piece.x:  # Can only move forward
-                    print("Invalid soldier move: RED hasn't crossed river, can only move forward")
+                    print("DEBUG: Invalid move - RED hasn't crossed river, can only move forward")
                     return False
         else:  # BLACK
+            print(f"DEBUG: BLACK soldier at y={piece.y} (river at y=5)")
+            # Black soldiers start at y=3 and move down (increasing y)
             if move.to_y <= piece.y:  # Must move forward (downward)
-                print("Invalid soldier move: BLACK must move downward (y should increase)")
+                print("DEBUG: Invalid move - BLACK must move downward (y should increase)")
                 return False
-            if piece.y > 4:  # Haven't crossed river
+            if piece.y <= 4:  # Haven't crossed river
                 if move.to_x != piece.x:  # Can only move forward
-                    print("Invalid soldier move: BLACK hasn't crossed river, can only move forward")
+                    print("DEBUG: Invalid move - BLACK hasn't crossed river, can only move forward")
                     return False
+                    
+        # After crossing river, soldiers can move forward or sideways (but not backwards)
+        if piece.side == Side.RED and move.to_y > piece.y:
+            print("DEBUG: Invalid move - RED cannot move backwards")
+            return False
+        if piece.side == Side.BLACK and move.to_y < piece.y:
+            print("DEBUG: Invalid move - BLACK cannot move backwards")
+            return False
+            
+        print("DEBUG: Move validation successful!")
+        return True
             
     return True
 
@@ -167,12 +189,16 @@ def make_move(game_state: GameState, move: Move) -> GameState:
             winner = generals[0].side if generals else None
         
         # Create and return new game state
-        return GameState(
+        next_turn = Side.BLACK if game_state.current_turn == Side.RED else Side.RED
+        print(f"Switching turn from {game_state.current_turn} to {next_turn}")
+        new_state = GameState(
             pieces=new_pieces,
-            current_turn=Side.BLACK if game_state.current_turn == Side.RED else Side.RED,
+            current_turn=next_turn,
             game_over=game_over,
             winner=winner
         )
+        print(f"New game state turn: {new_state.current_turn}")
+        return new_state
     except Exception as e:
         raise ValueError(f"Failed to create new game state: {str(e)}")
 

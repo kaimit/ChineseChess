@@ -67,12 +67,42 @@ async def make_player_move(move: Move):
             return current_game
             
         # Make AI move
+        print(f"Before AI move - current turn: {current_game.current_turn}")
+        print(f"Game state before AI move: {len(current_game.pieces)} pieces")
+        
+        # Verify it's black's turn before AI moves
+        if current_game.current_turn != Side.BLACK:
+            print(f"ERROR: Wrong turn for AI move: {current_game.current_turn}")
+            return current_game
+            
         ai_move = get_ai_move(current_game)
         if ai_move:
-            ai_game_state = make_move(current_game, ai_move)
-            if ai_game_state:
-                current_game = ai_game_state
+            print(f"AI selected move: piece_id={ai_move.piece_id}, to=({ai_move.to_x}, {ai_move.to_y})")
+            # Get the piece that AI is trying to move
+            if ai_move.piece_id < len(current_game.pieces):
+                piece = current_game.pieces[ai_move.piece_id]
+                print(f"AI attempting to move {piece.type} at ({piece.x}, {piece.y})")
             
+            if not is_valid_move(current_game, ai_move):
+                print("AI generated an invalid move!")
+                return current_game
+                
+            try:
+                ai_game_state = make_move(current_game, ai_move)
+                if ai_game_state:
+                    print(f"AI move successful - new turn: {ai_game_state.current_turn}")
+                    current_game = ai_game_state  # Update the global state
+                    print(f"Updated game state - current turn: {current_game.current_turn}")
+                    print(f"Game state after AI move: {len(current_game.pieces)} pieces")
+                else:
+                    print("AI move failed to generate new game state")
+            except ValueError as ve:
+                print(f"Error making AI move: {str(ve)}")
+                return current_game
+        else:
+            print("No AI move generated")
+            
+        # Return the updated game state after AI move
         return current_game
     except ValueError as ve:
         raise HTTPException(status_code=400, detail=str(ve))
