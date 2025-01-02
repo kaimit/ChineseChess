@@ -104,7 +104,8 @@ export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) =>
       )}
       
       <div className="grid grid-cols-9 gap-0 border border-gray-400">
-        {Array.from({ length: 10 }, (_, row) => {
+        {Array.from({ length: 10 }, (_, i) => {
+          const row = 9 - i;  // Start from bottom (row 9) and go up
           return (
             <div key={row} className="contents">
               {Array.from({ length: 9 }, (_, x) => renderSquare(x, row))}
