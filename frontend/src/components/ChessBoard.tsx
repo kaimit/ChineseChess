@@ -16,6 +16,8 @@ export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) =>
   const handleSquareClick = (x: number, y: number) => {
     if (!gameState) return;
 
+    console.log(`Square clicked: x=${x}, y=${y}`);
+
     if (selectedPiece === null) {
       // Select piece if it's the player's turn
       const pieceIndex = gameState.pieces.findIndex(
@@ -24,6 +26,8 @@ export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) =>
       if (pieceIndex !== -1 && gameState.current_turn === Side.RED) {
         setSelectedPiece(pieceIndex);
         console.log('Selected piece:', gameState.pieces[pieceIndex]);
+      } else {
+        console.log('No valid piece found at position:', { x, y });
       }
     } else {
       // Try to move the selected piece
@@ -35,17 +39,7 @@ export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) =>
           to: { x, y }
         });
         
-        // Validate basic soldier movement (can only move forward)
-        const isRedPiece = selectedPieceData.side === Side.RED;
-        const isForwardMove = isRedPiece ? 
-          (y < selectedPieceData.y) : 
-          (y > selectedPieceData.y);
-        
-        if (selectedPieceData.type === PieceType.SOLDIER && !isForwardMove) {
-          console.log('Invalid move: Soldiers can only move forward');
-          setSelectedPiece(null);
-          return;
-        }
+        // Let backend handle all move validation
         
         onMove({ piece_id: selectedPiece, to_x: x, to_y: y });
       } else {
@@ -68,32 +62,6 @@ export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) =>
     return symbols[piece.type][piece.side];
   };
 
-  const renderSquare = (x: number, y: number) => {
-    const piece = gameState?.pieces.find((p) => p.x === x && p.y === y);
-    const isSelected = piece && selectedPiece !== null && gameState?.pieces.findIndex(
-      (p) => p.x === piece.x && p.y === y
-    ) === selectedPiece;
-
-    return (
-      <div
-        key={`${x}-${y}`}
-        data-testid={`square-${x}-${y}`}
-        id={`square-${x}-${y}`}
-        devinid={`square-${x}-${y}`}
-        data-x={x}
-        data-y={y}
-        onClick={() => handleSquareClick(x, y)}
-        className={`w-12 h-12 border border-gray-400 flex items-center justify-center cursor-pointer
-          ${isSelected ? 'bg-blue-300 ring-2 ring-blue-500' : piece ? 'bg-amber-50' : 'bg-amber-100'}
-          ${piece?.side === Side.RED ? 'text-red-600' : 'text-gray-800'}
-          text-2xl font-bold hover:bg-blue-100 relative transition-all duration-200`}
-      >
-        {piece && getPieceSymbol(piece)}
-        {!piece && <div className="absolute inset-0 hover:bg-blue-50" />}
-      </div>
-    );
-  };
-
   return (
     <Card className="p-6 bg-amber-100">
       {gameState?.game_over && (
@@ -106,10 +74,28 @@ export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) =>
       
       <div className="grid grid-cols-9 gap-0 border border-gray-400">
         {Array.from({ length: 10 }, (_, i) => {
-          const y = 9 - i;  // Start from bottom (y=9) to top (y=0)
+          const y = 9 - i;  // y=9 at bottom (Red), y=0 at top (Black)
           return (
             <div key={y} className="contents">
-              {Array.from({ length: 9 }, (_, x) => renderSquare(x, y))}
+              {Array.from({ length: 9 }, (_, x) => {
+                const piece = gameState?.pieces.find(p => p.x === x && p.y === y);
+                return (
+                  <button
+                    key={`${x}-${y}`}
+                    data-devinid={`square-${x}-${y}`}
+                    onClick={() => handleSquareClick(x, y)}
+                    className={`w-12 h-12 border border-gray-400 flex items-center justify-center cursor-pointer
+                      ${selectedPiece !== null && gameState?.pieces[selectedPiece]?.x === x && gameState?.pieces[selectedPiece]?.y === y ? 'bg-blue-300 ring-2 ring-blue-500' : 'bg-amber-50'}
+                      hover:bg-blue-100 relative transition-all duration-200`}
+                  >
+                    {piece && (
+                      <span className={`text-2xl font-bold ${piece.side === Side.RED ? 'text-red-600' : 'text-gray-800'}`}>
+                        {getPieceSymbol(piece)}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           );
         })}
