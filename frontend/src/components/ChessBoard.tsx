@@ -69,11 +69,9 @@ export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) =>
   };
 
   const renderSquare = (x: number, y: number) => {
-    // Transform the visual y coordinate to match backend coordinate system
-    const backendY = y;  // y is already transformed in the grid rendering
-    const piece = gameState?.pieces.find((p) => p.x === x && p.y === backendY);
+    const piece = gameState?.pieces.find((p) => p.x === x && p.y === y);
     const isSelected = piece && selectedPiece !== null && gameState?.pieces.findIndex(
-      (p) => p.x === piece.x && p.y === backendY
+      (p) => p.x === piece.x && p.y === piece.y
     ) === selectedPiece;
 
     return (
@@ -105,16 +103,11 @@ export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) =>
         </Alert>
       )}
       
-      <div className="grid grid-cols-9 gap-0 border border-gray-400" style={{ transform: 'rotate(180deg)' }}>
+      <div className="grid grid-cols-9 gap-0 border border-gray-400">
         {Array.from({ length: 10 }, (_, row) => {
-          const y = 9 - row;  // Map visual rows to coordinate system
           return (
-            <div key={y} className="contents">
-              {Array.from({ length: 9 }, (_, x) => (
-                <div key={`${x}-${y}`} style={{ transform: 'rotate(180deg)' }}>
-                  {renderSquare(x, y)}
-                </div>
-              ))}
+            <div key={row} className="contents">
+              {Array.from({ length: 9 }, (_, x) => renderSquare(x, row))}
             </div>
           );
         })}
