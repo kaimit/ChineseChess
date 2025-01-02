@@ -104,11 +104,11 @@ export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) =>
       )}
       
       <div className="grid grid-cols-9 gap-0 border border-gray-400">
-        {Array.from({ length: 10 }, (_, i) => {
-          const row = 9 - i;  // Reverse the row order (9 at top, 0 at bottom)
+        {Array.from({ length: 10 }, (_, row) => {
+          const y = 9 - row;  // Map visual rows (0-9 top to bottom) to coordinate system (9-0 bottom to top)
           return (
-            <div key={row} className="contents">
-              {Array.from({ length: 9 }, (_, x) => renderSquare(x, row))}
+            <div key={y} className="contents">
+              {Array.from({ length: 9 }, (_, x) => renderSquare(x, y))}
             </div>
           );
         })}
