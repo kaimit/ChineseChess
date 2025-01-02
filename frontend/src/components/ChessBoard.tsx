@@ -34,6 +34,19 @@ export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) =>
           from: { x: selectedPieceData.x, y: selectedPieceData.y },
           to: { x, y }
         });
+        
+        // Validate basic soldier movement (can only move forward)
+        const isRedPiece = selectedPieceData.side === Side.RED;
+        const isForwardMove = isRedPiece ? 
+          (y < selectedPieceData.y) : 
+          (y > selectedPieceData.y);
+        
+        if (selectedPieceData.type === PieceType.SOLDIER && !isForwardMove) {
+          console.log('Invalid move: Soldiers can only move forward');
+          setSelectedPiece(null);
+          return;
+        }
+        
         onMove({ piece_id: selectedPiece, to_x: x, to_y: y });
       } else {
         console.log('Invalid move: Cannot move to the same position');
@@ -58,7 +71,7 @@ export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) =>
   const renderSquare = (x: number, y: number) => {
     const piece = gameState?.pieces.find((p) => p.x === x && p.y === y);
     const isSelected = piece && selectedPiece !== null && gameState?.pieces.findIndex(
-      (p) => p.x === piece.x && p.y === piece.y
+      (p) => p.x === piece.x && p.y === y
     ) === selectedPiece;
 
     return (
@@ -66,6 +79,7 @@ export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) =>
         key={`${x}-${y}`}
         data-testid={`square-${x}-${y}`}
         id={`square-${x}-${y}`}
+        devinid={`square-${x}-${y}`}
         data-x={x}
         data-y={y}
         onClick={() => handleSquareClick(x, y)}
@@ -91,11 +105,14 @@ export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) =>
       )}
       
       <div className="grid grid-cols-9 gap-0 border border-gray-400">
-        {Array.from({ length: 10 }, (_, y) => (
-          <div key={y} className="contents">
-            {Array.from({ length: 9 }, (_, x) => renderSquare(x, y))}
-          </div>
-        ))}
+        {Array.from({ length: 10 }, (_, i) => {
+          const y = 9 - i;  // Start from bottom (y=9) to top (y=0)
+          return (
+            <div key={y} className="contents">
+              {Array.from({ length: 9 }, (_, x) => renderSquare(x, y))}
+            </div>
+          );
+        })}
       </div>
 
       <div className="mt-4 flex justify-between items-center">
