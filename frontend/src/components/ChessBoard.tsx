@@ -13,11 +13,8 @@ interface ChessBoardProps {
 export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) => {
   const [selectedPiece, setSelectedPiece] = useState<number | null>(null);
 
-  const handleSquareClick = (x: number, visualY: number) => {
+  const handleSquareClick = (x: number, y: number) => {
     if (!gameState) return;
-
-    // Convert visual Y coordinate to backend Y coordinate (0 at top, 9 at bottom)
-    const y = 9 - visualY;
 
     if (selectedPiece === null) {
       // Select piece if it's the player's turn
@@ -71,9 +68,7 @@ export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) =>
     return symbols[piece.type][piece.side];
   };
 
-  const renderSquare = (x: number, visualY: number) => {
-    // Convert visual Y coordinate to backend Y coordinate (0 at top, 9 at bottom)
-    const y = 9 - visualY;
+  const renderSquare = (x: number, y: number) => {
     const piece = gameState?.pieces.find((p) => p.x === x && p.y === y);
     const isSelected = piece && selectedPiece !== null && gameState?.pieces.findIndex(
       (p) => p.x === piece.x && p.y === y
@@ -84,6 +79,7 @@ export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) =>
         key={`${x}-${y}`}
         data-testid={`square-${x}-${y}`}
         id={`square-${x}-${y}`}
+        devinid={`square-${x}-${y}`}
         data-x={x}
         data-y={y}
         onClick={() => handleSquareClick(x, y)}
@@ -109,10 +105,11 @@ export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) =>
       )}
       
       <div className="grid grid-cols-9 gap-0 border border-gray-400">
-        {Array.from({ length: 10 }, (_, visualY) => {
+        {Array.from({ length: 10 }, (_, i) => {
+          const y = 9 - i;  // Start from bottom (y=9) to top (y=0)
           return (
-            <div key={visualY} className="contents">
-              {Array.from({ length: 9 }, (_, x) => renderSquare(x, visualY))}
+            <div key={y} className="contents">
+              {Array.from({ length: 9 }, (_, x) => renderSquare(x, y))}
             </div>
           );
         })}
