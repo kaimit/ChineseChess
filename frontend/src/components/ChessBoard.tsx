@@ -28,19 +28,27 @@ export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) =>
     } else {
       // Try to move the selected piece
       const selectedPieceData = gameState.pieces[selectedPiece];
-      if (selectedPieceData && (selectedPieceData.x !== x || selectedPieceData.y !== y)) {
+      if (selectedPieceData && (selectedPieceData.x !== x || selectedPieceData.y !== (9 - y))) {
+        // Transform coordinates: flip y-coordinate since backend uses bottom-left origin
+        const transformedY = 9 - y;  // Transform y-coordinate (0-9 -> 9-0)
         console.log('Attempting move:', { 
           piece_id: selectedPiece, 
           from: { x: selectedPieceData.x, y: selectedPieceData.y },
-          to: { x, y }
-        });
-        // Transform coordinates: flip y-coordinate since backend uses bottom-left origin
-        const transformedY = 9 - y;  // Transform y-coordinate (0-9 -> 9-0)
-        console.log('Transformed move:', { 
-          piece_id: selectedPiece, 
-          from: { x: selectedPieceData.x, y: 9 - selectedPieceData.y },
           to: { x, y: transformedY }
         });
+        
+        // Validate basic soldier movement (can only move forward)
+        const isRedPiece = selectedPieceData.side === Side.RED;
+        const isForwardMove = isRedPiece ? 
+          (transformedY > selectedPieceData.y) : 
+          (transformedY < selectedPieceData.y);
+        
+        if (selectedPieceData.type === PieceType.SOLDIER && !isForwardMove) {
+          console.log('Invalid move: Soldiers can only move forward');
+          setSelectedPiece(null);
+          return;
+        }
+        
         onMove({ piece_id: selectedPiece, to_x: x, to_y: transformedY });
       } else {
         console.log('Invalid move: Cannot move to the same position');
