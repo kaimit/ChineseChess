@@ -69,9 +69,11 @@ export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) =>
   };
 
   const renderSquare = (x: number, y: number) => {
-    const piece = gameState?.pieces.find((p) => p.x === x && p.y === y);
+    // Transform the visual y coordinate to match backend coordinate system
+    const backendY = y;  // y is already transformed in the grid rendering
+    const piece = gameState?.pieces.find((p) => p.x === x && p.y === backendY);
     const isSelected = piece && selectedPiece !== null && gameState?.pieces.findIndex(
-      (p) => p.x === piece.x && p.y === piece.y
+      (p) => p.x === piece.x && p.y === backendY
     ) === selectedPiece;
 
     return (
@@ -103,12 +105,12 @@ export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) =>
         </Alert>
       )}
       
-      <div className="grid grid-cols-9 gap-0 border border-gray-400">
+      <div className="grid grid-cols-9 gap-0 border border-gray-400 flex flex-col">
         {Array.from({ length: 10 }, (_, row) => {
-          const y = 9 - row;  // Map visual rows (0-9 top to bottom) to coordinate system (9-0 bottom to top)
+          const y = row;  // Use row directly (0 at top, 9 at bottom)
           return (
             <div key={y} className="contents">
-              {Array.from({ length: 9 }, (_, x) => renderSquare(x, y))}
+              {Array.from({ length: 9 }, (_, x) => renderSquare(x, 9 - y))}  {/* Transform y here */}
             </div>
           );
         })}
