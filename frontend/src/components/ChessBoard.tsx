@@ -105,12 +105,16 @@ export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) =>
         </Alert>
       )}
       
-      <div className="grid grid-cols-9 gap-0 border border-gray-400 flex flex-col">
+      <div className="grid grid-cols-9 gap-0 border border-gray-400" style={{ transform: 'rotate(180deg)' }}>
         {Array.from({ length: 10 }, (_, row) => {
-          const y = row;  // Use row directly (0 at top, 9 at bottom)
+          const y = 9 - row;  // Map visual rows to coordinate system
           return (
             <div key={y} className="contents">
-              {Array.from({ length: 9 }, (_, x) => renderSquare(x, 9 - y))}  {/* Transform y here */}
+              {Array.from({ length: 9 }, (_, x) => (
+                <div key={`${x}-${y}`} style={{ transform: 'rotate(180deg)' }}>
+                  {renderSquare(x, y)}
+                </div>
+              ))}
             </div>
           );
         })}
