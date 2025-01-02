@@ -68,10 +68,12 @@ export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) =>
     return symbols[piece.type][piece.side];
   };
 
-  const renderSquare = (x: number, y: number) => {
+  const renderSquare = (x: number, visualY: number) => {
+    // Convert visual Y coordinate to backend Y coordinate (0 at top, 9 at bottom)
+    const y = 9 - visualY;
     const piece = gameState?.pieces.find((p) => p.x === x && p.y === y);
     const isSelected = piece && selectedPiece !== null && gameState?.pieces.findIndex(
-      (p) => p.x === piece.x && p.y === piece.y
+      (p) => p.x === piece.x && p.y === y
     ) === selectedPiece;
 
     return (
@@ -104,11 +106,10 @@ export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) =>
       )}
       
       <div className="grid grid-cols-9 gap-0 border border-gray-400">
-        {Array.from({ length: 10 }, (_, i) => {
-          const row = 9 - i;  // Start from bottom (row 9) and go up
+        {Array.from({ length: 10 }, (_, visualY) => {
           return (
-            <div key={row} className="contents">
-              {Array.from({ length: 9 }, (_, x) => renderSquare(x, row))}
+            <div key={visualY} className="contents">
+              {Array.from({ length: 9 }, (_, x) => renderSquare(x, visualY))}
             </div>
           );
         })}
