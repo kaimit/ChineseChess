@@ -34,7 +34,14 @@ export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) =>
           from: { x: selectedPieceData.x, y: selectedPieceData.y },
           to: { x, y }
         });
-        onMove({ piece_id: selectedPiece, to_x: x, to_y: y });
+        // Transform coordinates: flip y-coordinate since backend uses bottom-left origin
+        const transformedY = 9 - y;  // Transform y-coordinate (0-9 -> 9-0)
+        console.log('Transformed move:', { 
+          piece_id: selectedPiece, 
+          from: { x: selectedPieceData.x, y: 9 - selectedPieceData.y },
+          to: { x, y: transformedY }
+        });
+        onMove({ piece_id: selectedPiece, to_x: x, to_y: transformedY });
       } else {
         console.log('Invalid move: Cannot move to the same position');
       }
@@ -56,7 +63,8 @@ export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) =>
   };
 
   const renderSquare = (x: number, y: number) => {
-    const piece = gameState?.pieces.find((p) => p.x === x && p.y === y);
+    // Transform y-coordinate when finding pieces (backend uses bottom-left origin)
+    const piece = gameState?.pieces.find((p) => p.x === x && p.y === (9 - y));
     const isSelected = piece && selectedPiece !== null && gameState?.pieces.findIndex(
       (p) => p.x === piece.x && p.y === piece.y
     ) === selectedPiece;
