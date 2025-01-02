@@ -103,16 +103,15 @@ export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) =>
         </Alert>
       )}
       
-      <div className="grid grid-cols-9 gap-0 border border-gray-400">
-        {Array.from({ length: 10 }, (_, i) => {
-          // Render rows from bottom to top (9 to 0)
-          const y = i;
+      <div className="grid grid-cols-9 gap-0 border border-gray-400 flex flex-col-reverse">
+        {Array.from({ length: 10 }, (_, row) => {
+          const y = row;  // Use row index directly (0 at bottom, 9 at top)
           return (
             <div key={y} className="contents">
               {Array.from({ length: 9 }, (_, x) => renderSquare(x, y))}
             </div>
           );
-        }).reverse()}
+        })}
       </div>
 
       <div className="mt-4 flex justify-between items-center">
