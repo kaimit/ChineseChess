@@ -13,8 +13,11 @@ interface ChessBoardProps {
 export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) => {
   const [selectedPiece, setSelectedPiece] = useState<number | null>(null);
 
-  const handleSquareClick = (x: number, y: number) => {
+  const handleSquareClick = (x: number, visualY: number) => {
     if (!gameState) return;
+
+    // Convert visual Y coordinate to backend Y coordinate (0 at top, 9 at bottom)
+    const y = 9 - visualY;
 
     if (selectedPiece === null) {
       // Select piece if it's the player's turn
