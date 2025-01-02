@@ -72,3 +72,14 @@ class Move(BaseModel):
     piece_id: int  # Index in the pieces list
     to_x: int
     to_y: int
+    
+    class Config:
+        frozen = True  # Make the model immutable and hashable
+    
+    def __hash__(self):
+        return hash((self.piece_id, self.to_x, self.to_y))
+        
+    def __eq__(self, other):
+        if not isinstance(other, Move):
+            return False
+        return (self.piece_id, self.to_x, self.to_y) == (other.piece_id, other.to_x, other.to_y)
