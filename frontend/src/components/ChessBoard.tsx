@@ -16,13 +16,10 @@ export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) =>
   const handleSquareClick = (x: number, y: number) => {
     if (!gameState) return;
 
-    // Transform y-coordinate to match backend's coordinate system (0 at bottom)
-    const backendY = 9 - y;
-
     if (selectedPiece === null) {
       // Select piece if it's the player's turn
       const pieceIndex = gameState.pieces.findIndex(
-        (p) => p.x === x && p.y === backendY && p.side === Side.RED
+        (p) => p.x === x && p.y === y && p.side === Side.RED
       );
       if (pieceIndex !== -1 && gameState.current_turn === Side.RED) {
         setSelectedPiece(pieceIndex);
@@ -31,11 +28,11 @@ export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) =>
     } else {
       // Try to move the selected piece
       const selectedPieceData = gameState.pieces[selectedPiece];
-      if (selectedPieceData && (selectedPieceData.x !== x || selectedPieceData.y !== backendY)) {
+      if (selectedPieceData && (selectedPieceData.x !== x || selectedPieceData.y !== y)) {
         console.log('Attempting move:', { 
           piece_id: selectedPiece, 
           from: { x: selectedPieceData.x, y: selectedPieceData.y },
-          to: { x, y: backendY }
+          to: { x, y }
         });
         
         // Validate basic soldier movement (can only move forward)
@@ -72,11 +69,9 @@ export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) =>
   };
 
   const renderSquare = (x: number, y: number) => {
-    // Transform y-coordinate to match backend's coordinate system (0 at bottom)
-    const backendY = 9 - y;
-    const piece = gameState?.pieces.find((p) => p.x === x && p.y === backendY);
+    const piece = gameState?.pieces.find((p) => p.x === x && p.y === y);
     const isSelected = piece && selectedPiece !== null && gameState?.pieces.findIndex(
-      (p) => p.x === piece.x && p.y === backendY
+      (p) => p.x === piece.x && p.y === piece.y
     ) === selectedPiece;
 
     return (
@@ -110,14 +105,14 @@ export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) =>
       
       <div className="grid grid-cols-9 gap-0 border border-gray-400">
         {Array.from({ length: 10 }, (_, i) => {
-          // Flip the board vertically by reversing y coordinates
-          const y = 9 - i;
+          // Render rows from bottom to top (9 to 0)
+          const y = i;
           return (
             <div key={y} className="contents">
               {Array.from({ length: 9 }, (_, x) => renderSquare(x, y))}
             </div>
           );
-        })}
+        }).reverse()}
       </div>
 
       <div className="mt-4 flex justify-between items-center">
