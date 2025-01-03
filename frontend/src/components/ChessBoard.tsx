@@ -16,10 +16,12 @@ export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) =>
   const handleSquareClick = (x: number, y: number) => {
     if (!gameState) return;
 
+    // Backend coordinates: y=0 is top (Black), y=9 is bottom (Red)
+    // Frontend display: Using Array.from with 9-i to show Red at bottom
     console.log(`Square clicked: x=${x}, y=${y}`);
 
     if (selectedPiece === null) {
-      // Select piece if it's the player's turn
+      // Select piece if it's the player's turn and it's a Red piece
       const pieceIndex = gameState.pieces.findIndex(
         (p) => p.x === x && p.y === y && p.side === Side.RED
       );
@@ -33,13 +35,14 @@ export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) =>
       // Try to move the selected piece
       const selectedPieceData = gameState.pieces[selectedPiece];
       if (selectedPieceData && (selectedPieceData.x !== x || selectedPieceData.y !== y)) {
+        // Let backend handle all move validation
+        // We're using the backend's coordinate system directly:
+        // y=9 is bottom (Red), y=0 is top (Black)
         console.log('Attempting move:', { 
           piece_id: selectedPiece, 
           from: { x: selectedPieceData.x, y: selectedPieceData.y },
           to: { x, y }
         });
-        
-        // Let backend handle all move validation
         
         onMove({ piece_id: selectedPiece, to_x: x, to_y: y });
       } else {
@@ -72,11 +75,14 @@ export const ChessBoard = ({ gameState, onMove, onNewGame }: ChessBoardProps) =>
         </Alert>
       )}
       
-      <div className="grid grid-cols-9 gap-0 border border-gray-400">
-        {Array.from({ length: 10 }, (_, i) => {
-          const y = 9 - i;  // y=9 at bottom (Red), y=0 at top (Black)
+      <div className="flex flex-col-reverse border border-gray-400">
+        {Array.from({ length: 10 }, (_, i) => i).map(y => {
+          // Backend: y=0 at top (Black), y=9 at bottom (Red)
+          // Using i directly to render rows from top to bottom:
+          // i=0 maps to y=0 (Black), i=9 maps to y=9 (Red)
+          // This matches the backend coordinate system exactly
           return (
-            <div key={y} className="contents">
+            <div key={y} className="flex">
               {Array.from({ length: 9 }, (_, x) => {
                 const piece = gameState?.pieces.find(p => p.x === x && p.y === y);
                 return (

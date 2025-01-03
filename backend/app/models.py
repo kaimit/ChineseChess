@@ -36,21 +36,6 @@ class GameState(BaseModel):
         def add_piece(piece_type: PieceType, side: Side, x: int, y: int):
             pieces.append(Piece(type=piece_type, side=side, x=x, y=y))
 
-        # Red side (bottom)
-        add_piece(PieceType.GENERAL, Side.RED, 4, 9)
-        add_piece(PieceType.ADVISOR, Side.RED, 3, 9)
-        add_piece(PieceType.ADVISOR, Side.RED, 5, 9)
-        add_piece(PieceType.ELEPHANT, Side.RED, 2, 9)
-        add_piece(PieceType.ELEPHANT, Side.RED, 6, 9)
-        add_piece(PieceType.HORSE, Side.RED, 1, 9)
-        add_piece(PieceType.HORSE, Side.RED, 7, 9)
-        add_piece(PieceType.CHARIOT, Side.RED, 0, 9)
-        add_piece(PieceType.CHARIOT, Side.RED, 8, 9)
-        add_piece(PieceType.CANNON, Side.RED, 1, 7)
-        add_piece(PieceType.CANNON, Side.RED, 7, 7)
-        for x in [0, 2, 4, 6, 8]:
-            add_piece(PieceType.SOLDIER, Side.RED, x, 6)
-
         # Black side (top)
         add_piece(PieceType.GENERAL, Side.BLACK, 4, 0)
         add_piece(PieceType.ADVISOR, Side.BLACK, 3, 0)
@@ -65,6 +50,21 @@ class GameState(BaseModel):
         add_piece(PieceType.CANNON, Side.BLACK, 7, 2)
         for x in [0, 2, 4, 6, 8]:
             add_piece(PieceType.SOLDIER, Side.BLACK, x, 3)
+
+        # Red side (bottom)
+        add_piece(PieceType.GENERAL, Side.RED, 4, 9)
+        add_piece(PieceType.ADVISOR, Side.RED, 3, 9)
+        add_piece(PieceType.ADVISOR, Side.RED, 5, 9)
+        add_piece(PieceType.ELEPHANT, Side.RED, 2, 9)
+        add_piece(PieceType.ELEPHANT, Side.RED, 6, 9)
+        add_piece(PieceType.HORSE, Side.RED, 1, 9)
+        add_piece(PieceType.HORSE, Side.RED, 7, 9)
+        add_piece(PieceType.CHARIOT, Side.RED, 0, 9)
+        add_piece(PieceType.CHARIOT, Side.RED, 8, 9)
+        add_piece(PieceType.CANNON, Side.RED, 1, 7)
+        add_piece(PieceType.CANNON, Side.RED, 7, 7)
+        for x in [0, 2, 4, 6, 8]:
+            add_piece(PieceType.SOLDIER, Side.RED, x, 6)
 
         return cls(pieces=pieces, current_turn=Side.RED)
 
